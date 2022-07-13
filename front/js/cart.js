@@ -17,10 +17,11 @@ function totalAmount() {
     
         //---operations
         cart.forEach(item => {
-            // quantite
+            // quantite s'accumule
             number += Number(item.quantity);
-            // prix
+            // prix foix quantite
             add = item.price*item.quantity;
+            // le prix s'accumule
             price += add;
         });
         
@@ -242,8 +243,8 @@ firstName.addEventListener('change', (event) => {
     // recuperation de la saisie utilisateur
     let input = firstName.value;
     // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules
-    let regex = new RegExp(/^([a-zA-Z]{2,25})(\s[a-zA-Z]{2,25})?(-[a-zA-Z]{2,25})?$/, 'g');
-
+    //let regex = new RegExp(/^([a-zA-Z]{2,26})(\s[a-zA-Z]{2,26})?(-[a-zA-Z]{2,26})?$/, 'g');
+    let regex = new RegExp(/^([a-zA-Z]{2,26})(-[a-zA-Z]{2,26})?(\s[a-zA-Z]{2,26})?$/)
     //---Controle de la saisie
     // si la sasie est valide
     if (regex.test(input)) {
@@ -267,7 +268,7 @@ lastName.addEventListener('change', (event) => {
     // recuperation de la saisie utilisateur
     let input = lastName.value;
     // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules
-    let regex = new RegExp(/^([a-zA-Z]{1,3}\s)?([a-zA-Z]{1,3}[']{1})?([a-zA-Z]{2,25})(\s[a-zA-Z]{2,25})?(-[a-zA-Z]{2,25})?(\s[a-zA-Z]{2,25})?$/, 'g');
+    let regex = new RegExp(/^([a-zA-Z]{1,3}\s)?([a-zA-Z]{1,3}[']{1})?([a-zA-Z]{2,26})(\s[a-zA-Z]{2,26})?(-[a-zA-Z]{2,26})?(\s[a-zA-Z]{2,26})?$/, 'g');
 
     //---Controle de la saisie
     // si la sasie est valide
@@ -292,7 +293,7 @@ address.addEventListener('change', (event) => {
     // recuperation de la saisie utilisateur
     let input = address.value;
     // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules, limite a 20 lettres
-    let regex = new RegExp(/^([0-9]{1,6})\s([a-zA-Z]{2,12})(\s[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?\s([a-zA-Z]{2,24})(-[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?([-']{1}[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?([-']{1}[a-zA-Z]{2,12})?$/, 'g');
+    let regex = new RegExp(/^([0-9]{1,6})\s([a-zA-Z]{2,12})(\s[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?\s([a-zA-Z]{2,26})(-[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?([-']{1}[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?([-']{1}[a-zA-Z]{2,12})?$/, 'g');
 
     // controle de la saisie
     // si la sasie est valide
@@ -303,7 +304,7 @@ address.addEventListener('change', (event) => {
     // si la saisie est incorrecte
     } else {
         // On affiche un message d'erreur
-        document.getElementById('addressErrorMsg').innerHTML = "Votre adresse doit comporter un nombre suivit de caracteres :<br/>12 rue Thiers, 12035 boulevard de Ledru-Rollin, 8 chemin Beauvoir Chostakovitch ...";
+        document.getElementById('addressErrorMsg').innerHTML = "Votre adresse doit comporter un numero suivit de caracteres :<br/>12 rue Thiers, 12035 boulevard de Ledru-Rollin, 8 chemin Beauvoir Chostakovitch ...";
         return addressInput = true;
     };
 });
@@ -317,7 +318,7 @@ city.addEventListener('change', (event) => {
     // recuperation de la saisie utilisateur
     let input = city.value;
     // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules, limite a 20 lettres
-    let regex = new RegExp(/^([a-zA-Z]{2,25})([-']{1}[a-zA-Z]{2,24})?(\s[a-zA-Z]{2,24})?([-']{1}[a-zA-Z]{2,24})(\s[a-zA-Z]{2,24})?([-']{1}[a-zA-Z]{2,24})??$/, 'g');
+    let regex = new RegExp(/^([a-zA-Z]{2,26})([-']{1}[a-zA-Z]{2,26})?(\s[a-zA-Z]{2,26})?([-']{1}[a-zA-Z]{2,26})?(\s[a-zA-Z]{2,26})?([-']{1}[a-zA-Z]{2,26})?$/, 'g');
 
     //---controle de la saisie
     // si la sasie est valide
@@ -328,7 +329,7 @@ city.addEventListener('change', (event) => {
     // si la saisie est incorrecte
     } else {
         // On affiche un message d'erreur
-        document.getElementById('cityErrorMsg').innerHTML = "Votre ville doit comporter 3 caracteres minimum, avec une majuscule suivit de minuscules :<br/> Paris, Pau, Saint-Germain-En-Laye...";
+        document.getElementById('cityErrorMsg').innerHTML = "Votre ville doit comporter 2 caracteres minimum, avec une majuscule suivit de minuscules :<br/> Paris, Pau, Saint-Germain-En-Laye...";
         return cityInput = false;
     };
 });
@@ -408,7 +409,7 @@ orderButton.addEventListener('click', (event) => {
         //---Requete POST sur l'API et redirection
         getOrderId (contact, products);
 
-        // si fetch ne marche pas
+        //---si fetch ne marche pas
         //location.replace(`./confirmation.html?order=65431343444684674`);
 
     // si les valeurs du formulaire ne sont pas valides
