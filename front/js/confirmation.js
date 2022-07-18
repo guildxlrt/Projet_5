@@ -1,5 +1,5 @@
 //------Recuperer le numero de commande dans l'url
-function getOrderId () {
+function urlOrderId() {
     // recuperation de l'url de la page
     let url = new URL(window.location.href);
 
@@ -19,13 +19,12 @@ function getOrderId () {
 }
 
 //------Afficher le numero de commande
-(function displayOrder () {
-    let order = getOrderId();
-
+(function displayOrder() {
+    let order = urlOrderId();
+    
     // injection dans l'html
     document.getElementById('orderId').textContent = `${order}`;
-
-    // Suppression du panier dans le local storage
-    localStorage.removeItem('panier');
-
+    
+    // Suppression des donnees du local storage
+    localStorage.clear();
 })()

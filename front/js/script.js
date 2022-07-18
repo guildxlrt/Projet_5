@@ -1,5 +1,5 @@
 //------Fonction permetant de retourner tout les produits de l'API
-async function getProducts () { 
+async function getProducts() { 
     try {
         let response = await fetch('http://localhost:3000/api/products')
         // convertion de la reponse au format json    

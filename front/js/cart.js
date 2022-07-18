@@ -31,12 +31,8 @@ function totalAmount() {
     }
 };
 
-//-------------------FIN calculs recapitulatif-------//
-//--------------------------------------------------//
-//-------------------PANIER VIDE-------------------//
-
 //------Fonction du message : panier vide
-function emptyCart () {
+function emptyCart() {
     //---------On cache la section CART
     document.querySelector('.cart').hidden = true;
 
@@ -57,23 +53,27 @@ function emptyCart () {
 } 
 
 //------Conditions
+// si le panier existe
+if (JSON.parse(localStorage.getItem("panier"))) {
+    if (cart == 0) {
+        // cache le formulaire et affiche un message
+        emptyCart();
+
+    } else {
+        //---recalculer quantite et montant
+        totalAmount();
+    }
+
 // si le panier n'existe pas
-if (!JSON.parse(localStorage.getItem("panier"))) {
+} else if (!JSON.parse(localStorage.getItem("panier"))) {
     // on cree le panier pour envoyer directement
     cart = [];
     localStorage.setItem("panier", JSON.stringify(cart));
-    // retire le formulaire et affiche un message
+    // cache le formulaire et affiche un message
     emptyCart();
-// si le panier est vide
-} else if (cart == 0) {
-    // retire le formulaire et affiche un message
-    emptyCart()
-} else {
-    //---recalculer quantite et montant
-    totalAmount();
 }
 
-//-------------------FIN panier vide------------------------//
+//-------------------FIN calcul recapitulatif------------------------//
 //---------------------------------------------------------//
 //-------------------AFFICHAGE PRODUITS-------------------//
 (function displayCart() {
@@ -137,7 +137,7 @@ if (!JSON.parse(localStorage.getItem("panier"))) {
 
 //-------------------------------------------//
 //------------Suppression article-----------//
-(function delCartItem () {
+(function delCartItem() {
     //---lister les bouttons de suppression
     let delButtons = document.querySelectorAll("p.deleteItem");
     
@@ -151,12 +151,12 @@ if (!JSON.parse(localStorage.getItem("panier"))) {
             // pointer l'element a supprimer (element DOM)
             let article = item.closest('article');
             // retourner l'id et color de la cible (element DOM)
-            const delId = article.dataset.productId;
+            const delId = article.dataset.id;
             const delColor = article.dataset.color;
             // trouver de l'index du prodduit (tableau du document)
             // grace a l'id et de la couleur
             const index = cart.findIndex(e => e.productId === delId && e.color === delColor );
-            
+
             //-----Modification du Local Sorage
             // retire du tableau (document)
             cart.splice(index,1);
@@ -179,7 +179,7 @@ if (!JSON.parse(localStorage.getItem("panier"))) {
 
 //------------------------------------------//
 //------------Modifier quantite------------//
-(function modifyCartItem () {
+(function modifyCartItem() {
     //lister les input de quantite
     let quantButtons = document.querySelectorAll("input.itemQuantity");
 
@@ -193,8 +193,9 @@ if (!JSON.parse(localStorage.getItem("panier"))) {
             // pointer l'element a modifier (element DOM)
             let article = item.closest('article');
             // retourner l'id et color de la cible (element DOM)
-            const quantId = article.dataset.productId;
+            const quantId = article.dataset.id;
             const quantColor = article.dataset.color;
+
             // trouver de l'index du prodduit (tableau du document)
             // grace a l'id et de la couleur
             const index = cart.findIndex(e => e.productId === quantId && e.color === quantColor );
@@ -202,13 +203,13 @@ if (!JSON.parse(localStorage.getItem("panier"))) {
             //------Modification du Local Sorage
             // si la quantite enregistree est comprise entre 1 et 100
             if (item.value >= 1 && item.value <= 100) {
-            // modification du tableau (document)
-            cart[index].quantity = item.value;
-            // envoyer dans le Local Storage
-            localStorage.setItem("panier", JSON.stringify(cart));
+                // modification du tableau (document)
+                cart[index].quantity = item.value;
+                // envoyer dans le Local Storage
+                localStorage.setItem("panier", JSON.stringify(cart));
 
-            // recalculer quantite et montant
-            totalAmount();
+                // recalculer quantite et montant
+                totalAmount();
 
             // si la quantite enregistree n'est pas comprise entre 1 et 100
             } else {
@@ -222,8 +223,6 @@ if (!JSON.parse(localStorage.getItem("panier"))) {
 //-------------------FIN gestion panier-----------------------------//
 //-----------------------------------------------------------------//
 //-------------------VALIDATION DES DONNEES-------------------//
-
-
 
 // variables qui pointent les elements du DOM
 const firstName = document.getElementById("firstName");
@@ -361,9 +360,6 @@ email.addEventListener('change', (event) => {
 //------FIN email
 
 
-
-
-
 //-------------------FIN validation des formulaires---------//
 //---------------------------------------------------------//
 //-------------------ENVOI DE LA SAISIE-------------------//
@@ -406,11 +402,11 @@ orderButton.addEventListener('click', (event) => {
             products.push(item.productId)
         });
 
-        //---Requete POST sur l'API et redirection
-        getOrderId (contact, products);
 
+        //---Requete POST sur l'API et redirection
+        //getOrderId (contact, products);
         //---si fetch ne marche pas
-        //location.replace(`./confirmation.html?order=65431343444684674`);
+        location.replace(`./confirmation.html?order=65431343444684674`);
 
     // si les valeurs du formulaire ne sont pas valides
     } else {
@@ -421,7 +417,7 @@ orderButton.addEventListener('click', (event) => {
 
 
 //---------Fonction pour requeter l'API et rediriger sur la page de commande
-async function getOrderId (contact, products) {
+async function getOrderId(contact, products) {
 
     //---ecouter l'API
     fetch('http://localhost:3000/api/products/order', {
@@ -432,8 +428,8 @@ async function getOrderId (contact, products) {
         },
         // l'objet et le tableau sont converti au format json
         body : JSON.stringify({
-            'contact' : contact,
-            'products' : products
+            contact : contact,
+            products : products
         })
     })
     //---avec la reponse obtenue, redirige sur la page du numero de commande
@@ -441,8 +437,14 @@ async function getOrderId (contact, products) {
         if (res.ok) {
             // recuperation de la reponse
             orderId = res.json.orderId;
+
             // redirection url avec le numero de la commande
             location.replace(`./confirmation.html?order=${orderId}`);
         }
-    });
+    })
+    .catch(function (erreur) {
+        //Renvoie une réponse "(erreur)".
+        console.log("Une erreur est survenue" + erreur);
+        alert("Une erreur est survenue" + erreur);
+      });
 };

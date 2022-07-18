@@ -1,5 +1,5 @@
 //------Recuperer l'id dans l'url
-function getProductId () {
+function getProductId() {
 // Recuperation de l'url de la page
 let url = new URL(window.location.href);
 // Recuperation de tout les parametres de l'url
@@ -20,7 +20,7 @@ let params = new URLSearchParams(url.search);
 
 
 //------Retourner les caracteristiques du produit de l'API
-async function getProductData () {
+async function getProductData() {
     const productId = getProductId ();
     try {
         let response = await fetch(`http://localhost:3000/api/products/${productId}`);
@@ -34,10 +34,10 @@ async function getProductData () {
 };
 
 //-------------------------------------------------------------//
-//-------------------AFFICHAGE DES PRODUITS-------------------//
+//-------------------AFFICHAGE du PRODUITS-------------------//
 
 //------Afficher le produit
-(async function displayProducts() {
+(async function displayOneProduct() {
     let data = await getProductData ();
     document.getElementById('title').textContent = data.name;
     document.getElementById('price').textContent = data.price;
@@ -64,7 +64,7 @@ async function getProductData () {
 
 //-------------------FIN afichage des produits-------------//
 //--------------------------------------------------------//
-//-------------------GESTION DU PANIER-------------------//
+//-------------------AJOUT AU PANIER-------------------//
 
 //------Modele d'objet pour les produits selectionnes
 class product {
@@ -81,7 +81,7 @@ class product {
 };
 
 //---------Recuperation du choix de l'utilisateur---------//
-(async function userSelection(){
+(async function pushToCart(){
     // recuperation du produit selectionne (api)
     let productData =  await getProductData();
 
