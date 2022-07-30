@@ -7,8 +7,8 @@ function urlOrderId() {
     let params = new URLSearchParams(url.search);
     // Recuperation du parametre ORDERV
     // si l'order est present dans l'url
-    if (params.has('order')) {
-        let order = params.get('order');
+    if (params.has('orderId')) {
+        let order = params.get('orderId');
         return order;
     }
     // si l'order est absent de l'url
@@ -21,10 +21,10 @@ function urlOrderId() {
 //------Afficher le numero de commande
 (function displayOrder() {
     let order = urlOrderId();
-    
+
     // injection dans l'html
     document.getElementById('orderId').textContent = `${order}`;
-    
+
     // Suppression des donnees du local storage
     localStorage.clear();
 })()
