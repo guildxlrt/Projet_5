@@ -68,15 +68,10 @@ async function getProductData() {
 
 //------Modele d'objet pour les produits selectionnes
 class product {
-    constructor(productId,color, quantity, price, name, description, image, altTxt){
+    constructor(productId,color, quantity){
         this.productId = productId,
         this.color = color,
-        this.quantity = quantity,
-        this.price = price,
-        this.name = name,
-        this.description = description,
-        this.image = image,
-        this.altTxt = altTxt
+        this.quantity = quantity
     }
 };
 
@@ -102,12 +97,7 @@ class product {
         let selection = new product(
             productData._id,
             selectedColor.value,
-            Number(selectedQuantity.value), 
-            productData.price,
-            productData.name,
-            productData.description,
-            productData.imageUrl,
-            productData.altTxt
+            Number(selectedQuantity.value)
             );
             
         // si la quantite enregistree est comprise entre 1 et 100

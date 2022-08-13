@@ -1,33 +1,49 @@
 //------Recuperation du panier (Local Storage)
 let cart = JSON.parse(localStorage.getItem("panier"));
 
+// Retourner les caracteristiques du produit de l'API
+async function getProductData(id) {
+    try {
+        // interroger l'api
+        let response = await fetch(`http://localhost:3000/api/products/${id}`);
+        // convertion de la reponse au format json    
+        return await response.json();
+        }
+    catch (e) {
+        console.log("Erreur lors de l'appel du serveur " + e);
+        alert("Erreur lors de l'appel du serveur ");
+    };
+};
+
 
 //------------------------------------------------------------//
 //-------------------CALCULS RECAPITULATIF-------------------//
 
 // Calcul du recapitulatif
-function totalAmount() {
+async function totalAmount() {
     // si le panier n'est pas vide
     if (!cart == 0) {
-        //-----variables
+        //---variables
         // total des articles
-        let number = 0;
+        let quant = 0;
         // montant total
-        let price = 0;
+        let amount = 0;
 
         //---operations
-        cart.forEach(item => {
+        for (let item of cart) {
             // quantite s'accumule
-            number += Number(item.quantity);
-            // prix foix quantite
-            add = item.price * item.quantity;
+            quant += Number(item.quantity);
+            
+            let data = await getProductData(item.productId);
+            // prix X quantite
+            add = item.quantity * data.price;
             // le prix s'accumule
-            price += add;
-        });
+            amount += add;
+        };
 
         //---injection du rendu dans l'html
-        document.getElementById('totalQuantity').innerHTML = number;
-        document.getElementById('totalPrice').innerHTML = price;
+        document.getElementById('totalQuantity').innerHTML = quant;
+        document.getElementById('totalPrice').innerHTML = amount;
     }
 };
 
@@ -73,26 +89,26 @@ if (JSON.parse(localStorage.getItem("panier"))) {
     emptyCart();
 }
 
-//-------------------FIN calcul recapitulatif------------------------//
+//-------------------FIN calcul recapitulatif---------------//
 //---------------------------------------------------------//
 //-------------------AFFICHAGE PRODUITS-------------------//
-(function displayCart() {
+(async function displayCart() {
     //---creation du rendu
     let render = '';
-    cart.forEach(item => {
+    for(let item of cart) {
         // Si la quantite de l'article est entre 1 et 100
         if (item.quantity >= 1 && item.quantity <= 100) {
             // on laisse la quantite intacte
             item.quantity = item.quantity;
 
-            // Si la quantite de l'article est superieur a 100
+        // Si la quantite de l'article est superieur a 100
         } else if (item.quantity > 100) {
             // remettre a 100
             item.quantity = 100;
             // envoyer dans le Local Storage
             localStorage.setItem("panier", JSON.stringify(cart));
 
-            // Si la quantite de l'article est inferrieur a 1
+        // Si la quantite de l'article est inferrieur a 1
         } else {
             // remettre a 1
             item.quantity = 1;
@@ -100,17 +116,18 @@ if (JSON.parse(localStorage.getItem("panier"))) {
             localStorage.setItem("panier", JSON.stringify(cart));
         };
 
-        // Rendu html
+        //------Rendu HTML
+        let data = await getProductData(item.productId);
         let htmlContentItem = `
             <article class="cart__item" data-id="${item.productId}" data-color="${item.color}">
                 <div class="cart__item__img">
-                    <img src="${item.image}" alt="${item.altTxt}">
+                    <img src="${data.imageUrl}" alt="${data.altTxt}">
                 </div>
                 <div class="cart__item__content">
                     <div class="cart__item__content__description">
-                        <h2>${item.name}</h2>
+                        <h2>${data.name}</h2>
                         <p>${item.color}</p>
-                        <p>${item.price} €</p>
+                        <p>${data.price} €</p>
                     </div>
                     <div class="cart__item__content__settings">
                         <div class="cart__item__content__settings__quantity">
@@ -126,103 +143,101 @@ if (JSON.parse(localStorage.getItem("panier"))) {
         `;
         // Stocker le rendu en memoire
         render = render + htmlContentItem;
-    });
+    };
     //---injection du rendu dans l'html
     document.getElementById('cart__items').innerHTML = render;
-})();
 
-//-------------------FIN affichage produits-------------//
-//-----------------------------------------------------//
-//-------------------GESTION PANIER-------------------//
+    //-------------------------------------------//
+    //------------Suppression article-----------//
+    (function delCartItem() {
+        //---lister les bouttons de suppression
+        let delButtons = document.querySelectorAll("p.deleteItem");
 
-//-------------------------------------------//
-//------------Suppression article-----------//
-(function delCartItem() {
-    //---lister les bouttons de suppression
-    let delButtons = document.querySelectorAll("p.deleteItem");
+        //---Supprimer l'element cible
+        delButtons.forEach(item => {
+            item.addEventListener("click", (event) => {
+                // bloquer les evenements par defaut
+                event.preventDefault();
 
-    //---Supprimer l'element cible
-    delButtons.forEach(item => {
-        item.addEventListener("click", (event) => {
-            // bloquer les evenements par defaut
-            event.preventDefault();
+                //---Identifier les elements            
+                // pointer l'element a supprimer (element DOM)
+                let article = item.closest('article');
+                // retourner l'id et color de la cible (element DOM)
+                const delId = article.dataset.id;
+                const delColor = article.dataset.color;
+                // trouver de l'index du prodduit (tableau du document)
+                // grace a l'id et de la couleur
+                const index = cart.findIndex(e => e.productId === delId && e.color === delColor);
 
-            //---Identifier les elements            
-            // pointer l'element a supprimer (element DOM)
-            let article = item.closest('article');
-            // retourner l'id et color de la cible (element DOM)
-            const delId = article.dataset.id;
-            const delColor = article.dataset.color;
-            // trouver de l'index du prodduit (tableau du document)
-            // grace a l'id et de la couleur
-            const index = cart.findIndex(e => e.productId === delId && e.color === delColor);
-
-            //-----Modification du Local Sorage
-            // retire du tableau (document)
-            cart.splice(index, 1);
-            // envoyer dans le Local Storage
-            localStorage.setItem("panier", JSON.stringify(cart));
-
-            // Si le panier est vide
-            if (cart == 0) {
-                // retire le formulaire et affiche un message
-                emptyCart();
-            }
-
-            //---suppression dans le DOM
-            article.remove();
-            //---recalculer quantite et montant
-            totalAmount();
-        });
-    });
-})();
-
-//------------------------------------------//
-//------------Modifier quantite------------//
-(function modifyCartItem() {
-    //lister les input de quantite
-    let quantButtons = document.querySelectorAll("input.itemQuantity");
-
-    //---Modifier l'element cible
-    quantButtons.forEach(item => {
-        item.addEventListener("change", (event) => {
-            // bloquer les evenements par defaut
-            event.preventDefault();
-
-            //---Identifier les elements
-            // pointer l'element a modifier (element DOM)
-            let article = item.closest('article');
-            // retourner l'id et color de la cible (element DOM)
-            const quantId = article.dataset.id;
-            const quantColor = article.dataset.color;
-
-            // trouver de l'index du prodduit (tableau du document)
-            // grace a l'id et de la couleur
-            const index = cart.findIndex(e => e.productId === quantId && e.color === quantColor);
-
-            //------Modification du Local Sorage
-            // si la quantite enregistree est comprise entre 1 et 100
-            if (item.value >= 1 && item.value <= 100) {
-                // modification du tableau (document)
-                cart[index].quantity = item.value;
+                //-----Modification du Local Sorage
+                // retire du tableau (document)
+                cart.splice(index, 1);
                 // envoyer dans le Local Storage
                 localStorage.setItem("panier", JSON.stringify(cart));
 
-                // recalculer quantite et montant
-                totalAmount();
+                // Si le panier est vide
+                if (cart == 0) {
+                    // retire le formulaire et affiche un message
+                    emptyCart();
+                }
 
-                // si la quantite enregistree n'est pas comprise entre 1 et 100
-            } else {
-                // Message erreur
-                alert("Veuillez indiquer une quantite entre 1 et 100");
-            };
+                //---suppression dans le DOM
+                article.remove();
+                //---recalculer quantite et montant
+                totalAmount();
+            });
         });
-    });
+    })();
+
+    //------------------------------------------//
+    //------------Modifier quantite------------//
+    (function modifyCartItem() {
+        //lister les input de quantite
+        let quantButtons = document.querySelectorAll("input.itemQuantity");
+
+        //---Modifier l'element cible
+        quantButtons.forEach(item => {
+            item.addEventListener("change", (event) => {
+                // bloquer les evenements par defaut
+                event.preventDefault();
+
+                //---Identifier les elements
+                // pointer l'element a modifier (element DOM)
+                let article = item.closest('article');
+                // retourner l'id et color de la cible (element DOM)
+                const quantId = article.dataset.id;
+                const quantColor = article.dataset.color;
+
+                // trouver de l'index du prodduit (tableau du document)
+                // grace a l'id et de la couleur
+                const index = cart.findIndex(e => e.productId === quantId && e.color === quantColor);
+
+                //------Modification du Local Sorage
+                // si la quantite enregistree est comprise entre 1 et 100
+                if (item.value >= 1 && item.value <= 100) {
+                    // modification du tableau (document)
+                    cart[index].quantity = item.value;
+                    // envoyer dans le Local Storage
+                    localStorage.setItem("panier", JSON.stringify(cart));
+
+                    // recalculer quantite et montant
+                    totalAmount();
+
+                    // si la quantite enregistree n'est pas comprise entre 1 et 100
+                } else {
+                    // Message erreur
+                    alert("Veuillez indiquer une quantite entre 1 et 100");
+                };
+            });
+        });
+    })();
 })();
+
 
 //-------------------FIN gestion panier-----------------------------//
 //-----------------------------------------------------------------//
 //-------------------VALIDATION DES DONNEES-------------------//
+
 
 // variables qui pointent les elements du DOM
 const firstName = document.getElementById("firstName");
