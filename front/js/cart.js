@@ -180,7 +180,6 @@ if (JSON.parse(localStorage.getItem("panier"))) {
                     // retire le formulaire et affiche un message
                     emptyCart();
                 }
-
                 //---suppression dans le DOM
                 article.remove();
                 //---recalculer quantite et montant
@@ -238,142 +237,85 @@ if (JSON.parse(localStorage.getItem("panier"))) {
 //-----------------------------------------------------------------//
 //-------------------VALIDATION DES DONNEES-------------------//
 
-
-// variables qui pointent les elements du DOM
-const firstName = document.getElementById("firstName");
-const lastName = document.getElementById("lastName");
-const address = document.getElementById("address");
-const city = document.getElementById("city");
-const email = document.getElementById("email");
-
-// variables qui permettent la recuperation des valeurs des formulaires
+// variables qui permettront la recuperation des valeurs des cellules du formulaire
 let firstNameInput, lastNameInput, addressInput, cityInput, emailInput;
 
-//------VALIDATION prenom
-firstName.addEventListener('change', (event) => {
-    // bloquer les evenements par defaut
-    event.preventDefault();
+// modele pour creer des objets liees aux cellules
+class cell {
+    constructor(element, regex, errorMsg, errorMsgTxt, input) {
+        this.title = element,
+        this.DOM = document.getElementById(element),
+        this.regex = regex,
+        this.errorMsg = document.getElementById(errorMsg),
+        this.errorMsgTxt = errorMsgTxt,
+        this.input = input
+    }
+};
 
-    // recuperation de la saisie utilisateur
-    let input = firstName.value;
-    // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules
-    //let regex = new RegExp(/^([a-zA-Z]{2,26})(\s[a-zA-Z]{2,26})?(-[a-zA-Z]{2,26})?$/, 'g');
-    let regex = new RegExp(/^([a-zA-Z]{2,26})(-[a-zA-Z]{2,26})?(\s[a-zA-Z]{2,26})?$/)
-        //---Controle de la saisie
-        // si la sasie est valide
-    if (regex.test(input)) {
-        // On affiche un signe d'approbation
-        document.getElementById('firstNameErrorMsg').textContent = '🗸';
-        return firstNameInput = true;
-        // si la saisie est incorrecte
-    } else {
-        // On affiche un message d'erreur
-        document.getElementById('firstNameErrorMsg').innerHTML = "Votre prenom doit comporter 2 caracteres minimum, avec  une majuscule suivit de minuscules:<br/>Paul, Marie-Louise, Jose Antonio ...";
-        return firstNameInput = false;
-    };
+//------------PRENOM
+let firstName = new cell('firstName',
+// definition de lexpression reguliere
+new RegExp(/^([a-zA-ZÀ-ÿ]{2,26})(-[a-zA-ZÀ-ÿ]{2,26})?(\s[a-zA-ZÀ-ÿ]{2,26})?$/, 'g')
+,'firstNameErrorMsg',
+"Votre prenom doit comporter 2 caracteres minimum, avec  une majuscule suivit de minuscules:<br/>Paul, Marie-Louise, Jose Antonio ...",
+firstNameInput);
+
+//------------NOM DE FAMILLE
+let lastName = new cell('lastName',
+// definition de lexpression reguliere
+new RegExp(/^([a-zA-ZÀ-ÿ]{1,3}\s)?([a-zA-ZÀ-ÿ]{1,3}[']{1})?([a-zA-ZÀ-ÿ]{2,26})(\s[a-zA-ZÀ-ÿ]{2,26})?(-[a-zA-ZÀ-ÿ]{2,26})?(\s[a-zA-ZÀ-ÿ]{2,26})?$/, 'g'),
+'lastNameErrorMsg',
+"Votre nom de famille doit comporter 2 caracteres minimum, avec une majuscule suivit de minuscules :<br/>Dupont, D'Artagnan, De Sade, Primo De Rivera ...",
+lastNameInput);
+
+//------------ADRESSE
+let address = new cell('address',
+// definition de lexpression reguliere
+new RegExp(/^([0-9]{1,6})\s([a-zA-ZÀ-ÿ]{2,12})(\s[a-zA-ZÀ-ÿ]{2,12})?(\s[a-zA-ZÀ-ÿ]{2,12})?\s([a-zA-ZÀ-ÿ]{2,26})(-[a-zA-ZÀ-ÿ]{2,12})?(\s[a-zA-ZÀ-ÿ]{2,12})?([-']{1}[a-zA-ZÀ-ÿ]{2,12})?(\s[a-zA-ZÀ-ÿ]{2,12})?([-']{1}[a-zA-ZÀ-ÿ]{2,12})?$/, 'g'),
+'addressErrorMsg',
+"Votre adresse doit comporter un numero suivit de caracteres :<br/>12 rue Thiers, 12035 boulevard de Ledru-Rollin, 8 chemin Beauvoir Chostakovitch ...",
+addressInput);
+
+//------------VILLE
+let city = new cell('city',
+// definition de lexpression reguliere
+new RegExp(/^([a-zA-ZÀ-ÿ]{2,26})([-']{1}[a-zA-ZÀ-ÿ]{2,26})?(\s[a-zA-ZÀ-ÿ]{2,26})?([-']{1}[a-zA-ZÀ-ÿ]{2,26})?(\s[a-zA-ZÀ-ÿ]{2,26})?([-']{1}[a-zA-ZÀ-ÿ]{2,26})?$/, 'g'),
+'cityErrorMsg',
+"Votre ville doit comporter 2 caracteres minimum, avec une majuscule suivit de minuscules :<br/> Paris, Pau, Saint-Germain-En-Laye...",
+cityInput);
+
+//------------EMAIL
+let email = new cell('email',
+// definition de lexpression reguliere
+new RegExp(/^([a-z0-9._-]+)@([a-z0-9]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/, 'g'),
+'emailErrorMsg',
+"Votre email ne doit comporter que des chiffres et des lettres minuscules : alix93@gmail.com, sasha.dupont@yahoo.fr, kanap-service_client@kanap.co.fr ...",
+emailInput);
+
+// creation d'un tableau pour pouvoir executer une boucle
+form = [];
+form.push(firstName, lastName, address, city, email);
+
+//------Fonction de validation
+form.forEach(item => {
+    item.DOM.addEventListener('change', (event) => {
+        // bloquer les evenements par defaut
+        event.preventDefault();
+   
+        if (item.regex.test(item.DOM.value)) {
+            // On affiche un signe d'approbation
+            item.errorMsg.textContent = '🗸';
+            return item.input = true;
+            // si la saisie est incorrecte
+        } else {
+            // On affiche un message d'erreur
+            item.errorMsg.innerHTML = item.errorMsgTxt;
+            return item.input = false;
+        };
+        
+    });
 });
-//------FIN prenom
-
-//------VALIDATION nom de famille
-lastName.addEventListener('change', (event) => {
-    // bloquer les evenements par defaut
-    event.preventDefault();
-
-    // recuperation de la saisie utilisateur
-    let input = lastName.value;
-    // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules
-    let regex = new RegExp(/^([a-zA-Z]{1,3}\s)?([a-zA-Z]{1,3}[']{1})?([a-zA-Z]{2,26})(\s[a-zA-Z]{2,26})?(-[a-zA-Z]{2,26})?(\s[a-zA-Z]{2,26})?$/, 'g');
-
-    //---Controle de la saisie
-    // si la sasie est valide
-    if (regex.test(input)) {
-        // On affiche un signe d'approbation 
-        document.getElementById('lastNameErrorMsg').textContent = '🗸';
-        return lastNameInput = true;
-        // si la saisie est incorrecte
-    } else {
-        // On affiche un message d'erreur
-        document.getElementById('lastNameErrorMsg').innerHTML = "Votre nom de famille doit comporter 2 caracteres minimum, avec une majuscule suivit de minuscules :<br/>Dupont, D'Artagnan, De Sade, Primo De Rivera ...";
-        return lastNameInput = false;
-    };
-});
-//------FIN nom de famille
-
-//------VALIDATION adresse
-address.addEventListener('change', (event) => {
-    // bloquer les evenements par defaut
-    event.preventDefault();
-
-    // recuperation de la saisie utilisateur
-    let input = address.value;
-    // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules, limite a 20 lettres
-    let regex = new RegExp(/^([0-9]{1,6})\s([a-zA-Z]{2,12})(\s[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?\s([a-zA-Z]{2,26})(-[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?([-']{1}[a-zA-Z]{2,12})?(\s[a-zA-Z]{2,12})?([-']{1}[a-zA-Z]{2,12})?$/, 'g');
-
-    // controle de la saisie
-    // si la sasie est valide
-    if (regex.test(input)) {
-        // On affiche un signe d'approbation 
-        document.getElementById('addressErrorMsg').textContent = '🗸';
-        return addressInput = true;
-        // si la saisie est incorrecte
-    } else {
-        // On affiche un message d'erreur
-        document.getElementById('addressErrorMsg').innerHTML = "Votre adresse doit comporter un numero suivit de caracteres :<br/>12 rue Thiers, 12035 boulevard de Ledru-Rollin, 8 chemin Beauvoir Chostakovitch ...";
-        return addressInput = true;
-    };
-});
-//------FIN adresse
-
-//------VALIDATION ville
-city.addEventListener('change', (event) => {
-    // bloquer les evenements par defaut
-    event.preventDefault();
-
-    // recuperation de la saisie utilisateur
-    let input = city.value;
-    // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules, limite a 20 lettres
-    let regex = new RegExp(/^([a-zA-Z]{2,26})([-']{1}[a-zA-Z]{2,26})?(\s[a-zA-Z]{2,26})?([-']{1}[a-zA-Z]{2,26})?(\s[a-zA-Z]{2,26})?([-']{1}[a-zA-Z]{2,26})?$/, 'g');
-
-    //---controle de la saisie
-    // si la sasie est valide
-    if (regex.test(input)) {
-        // On affiche un signe d'approbation 
-        document.getElementById('cityErrorMsg').textContent = '🗸';
-        return cityInput = true;
-        // si la saisie est incorrecte
-    } else {
-        // On affiche un message d'erreur
-        document.getElementById('cityErrorMsg').innerHTML = "Votre ville doit comporter 2 caracteres minimum, avec une majuscule suivit de minuscules :<br/> Paris, Pau, Saint-Germain-En-Laye...";
-        return cityInput = false;
-    };
-});
-//------FIN ville
-
-//------VALIDATION email
-email.addEventListener('change', (event) => {
-    // bloquer les evenements par defaut
-    event.preventDefault();
-
-    // recuperation de la saisie utilisateur
-    let input = email.value;
-    // definition de l'expression reguliere : uniquement des lettres, une majuscule au debut, puis des minuscules, limite a 20 lettres
-    let regex = new RegExp(/^([a-z0-9._-]+)@([a-z0-9]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/, 'g');
-
-    // controle de la saisie
-    // si la sasie est valide
-    if (regex.test(input)) {
-        // On affiche un signe d'approbation 
-        document.getElementById('emailErrorMsg').textContent = '🗸';
-        return emailInput = true;
-        // si la saisie est incorrecte
-    } else {
-        // On affiche un message d'erreur
-        document.getElementById('emailErrorMsg').textContent = "Votre email ne doit comporter que des chiffres et des lettres minuscules : alix93@gmail.com, sasha.dupont@yahoo.fr, kanap-service_client@kanap.co.fr ...";
-        return emailInput = false;
-    };
-});
-//------FIN email
-
+//------FIN ~ Fonction de validation
 
 //-------------------FIN validation des formulaires---------//
 //---------------------------------------------------------//
@@ -394,6 +336,7 @@ class contactInfos {
 // pointer le boutton (DOM)
 const orderButton = document.getElementById('order');
 
+
 // Lorsque le boutton est clique
 orderButton.addEventListener('click', (event) => {
     // bloquer les evenements par defaut
@@ -401,15 +344,23 @@ orderButton.addEventListener('click', (event) => {
 
     //------Conditions
     // si les valeurs du formulaire sont valides
-    if (firstNameInput === true && lastNameInput === true && addressInput === true && cityInput === true && emailInput === true) {
+    if (form[0].input === true && form[1].input === true && form[2].input === true && form[3].input === true && form[4].input === true) {
+        
         // Creation de l'objet contenant les renseignements
         let contact = new contactInfos(
-            firstName.value,
-            lastName.value,
-            address.value,
-            city.value,
-            email.value
+            // prenom
+            form[0].DOM.value,
+            // nom de famille
+            form[1].DOM.value,
+            //adresse
+            form[2].DOM.value,
+            // ville
+            form[3].DOM.value,
+            //email
+            form[4].DOM.value
         );
+
+        console.dir(contact)
 
         //---Recuperation des id's des produts pour creer un tableau d'Id's
         let products = [];
